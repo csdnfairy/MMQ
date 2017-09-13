@@ -25,15 +25,12 @@ CMessageQueue::~CMessageQueue()
 +++++++++++++++++++++++++++++++++++++++++*/
 bool CMessageQueue::Create()
 {
-	int err = 0;
 	/*首先，尝试打开指定映射文件*/
 	_hMap = ::OpenFileMapping(FILE_MAP_WRITE, false, _memName);
-
 
 	/*打开失败说明尚未为文件创建映射，需要先创建映射*/
 	if (_hMap == NULL)
 	{
-		err = GetLastError();
 		/*创建文件对象*/
 		HANDLE hFile = CreateFile(_memName, 
 								  GENERIC_READ | GENERIC_WRITE, 
@@ -42,37 +39,19 @@ bool CMessageQueue::Create()
 								  OPEN_ALWAYS,
 								  FILE_ATTRIBUTE_NORMAL,
 								  0);
-		if (hFile == INVALID_HANDLE_VALUE)
-		{
-			err = GetLastError();
-			return false;
-		}
+		if (hFile == INVALID_HANDLE_VALUE) return false;
 
+		/*如果文件小于共享内存区目标大小，扩充文件*/
 		unsigned long fileSizeHigh = 0;
 		auto sz = GetFileSize(hFile, &fileSizeHigh);
 		if (sz < MEMORY_SIZE)
 			ExtendMapFileSize(hFile, MEMORY_SIZE - sz);
 				
-
-		_hMap = ::CreateFileMapping(hFile,
-				                    0, 
-				                    PAGE_READWRITE,
-				                    0, 
-				                    MEMORY_SIZE,
-				                    0);  //创建文件映射
-		if (_hMap == INVALID_HANDLE_VALUE)
-		{
-			err = GetLastError();
-			return false;
-		}
+		_hMap = ::CreateFileMapping(hFile, 0, PAGE_READWRITE, 0, MEMORY_SIZE, 0);  //创建文件映射
+		if (_hMap == INVALID_HANDLE_VALUE) return false;
 			
-
 		_pBeginPos = (CMemoryMessage*)::MapViewOfFile(_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0); //将文件映射至进程地址空间
-		if (_pBeginPos == nullptr)
-		{
-			err = GetLastError();
-			return false;
-		}
+		if (_pBeginPos == nullptr) return false;
 			
 
 		/*创建或打开消息队列锁和委托队列锁*/
@@ -84,6 +63,14 @@ bool CMessageQueue::Create()
 	return true;
 }
 
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*摘要：向消息队列中加入发布一条新消息
+*输入：message_code -- 消息码
+*      args -- 消息参数
+*输出：true -- 发布成功
+*      false -- 失败， 原因请调用GetLastError
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 bool CMessageQueue::Publish(int message_code, vector<string> args)
 {
 	CMemoryMessage message(message_code);
@@ -91,13 +78,13 @@ bool CMessageQueue::Publish(int message_code, vector<string> args)
 	for (; begin < args.end(); ++begin)
 		message.AddArg(*begin);
 	
-	::WaitForSingleObject(_hMutexForMessageQueue, INFINITE);
+	//::WaitForSingleObject(_hMutexForMessageQueue, INFINITE);
 	if (_writePos - _readPos < MEMORY_SIZE)
 	{
 		*(_pBeginPos + _writePos % MEMORY_SIZE) = message;
 		_writePos++;
 	}
-	::ReleaseMutex(_hMutexForMessageQueue);
+	//::ReleaseMutex(_hMutexForMessageQueue);
 
 	return false;
 }

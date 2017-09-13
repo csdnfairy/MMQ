@@ -1,9 +1,10 @@
 ﻿  stdafx.cpp
   MessageQueue.cpp
-d:\study\mmq\messagequeue.h(51): warning C4091: “__declspec(dllexport)”: 没有声明变量时忽略“CMessageQueue”的左侧
+d:\资料\mmq\messagequeue.h(54): warning C4091: “__declspec(dllexport)”: 没有声明变量时忽略“CMessageQueue”的左侧
+d:\资料\mmq\messagequeue.cpp(167): warning C4800: “BOOL”: 将值强制为布尔值“true”或“false”(性能警告)
   MemoryMessage.cpp
   Delegete.cpp
   正在生成代码...
   dllmain.cpp
-    正在创建库 D:\Study\MMQ\Debug\MemoryMQ.lib 和对象 D:\Study\MMQ\Debug\MemoryMQ.exp
-  MemoryMQ.vcxproj -> D:\Study\MMQ\Debug\MemoryMQ.dll
+    正在创建库 D:\资料\MMQ\Debug\MemoryMQ.lib 和对象 D:\资料\MMQ\Debug\MemoryMQ.exp
+  MemoryMQ.vcxproj -> D:\资料\MMQ\Debug\MemoryMQ.dll
