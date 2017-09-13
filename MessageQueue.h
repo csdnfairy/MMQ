@@ -32,8 +32,11 @@ public:
 	MEMORY_MQ_API void Destory(); //销毁消息队列
 
 private:
+	bool ExtendMapFileSize(HANDLE hFile, int extendSize);
+
+private:
 	std::vector<CDelegete> _dels; //委托队列
-	const LPCWSTR _memName = L"_mq_mem_"; //共享内存区名称
+	const LPCWSTR _memName = L"c:\\_mq_mem_"; //共享内存区名称
 	HANDLE _hMap;  //映射文件句柄
 	HANDLE _hMutexForMessageQueue; //消息队列互斥锁
 	HANDLE _hMutexForDelQueue;  //委托队列互斥锁

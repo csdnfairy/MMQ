@@ -47,6 +47,11 @@ bool CMessageQueue::Create()
 			err = GetLastError();
 			return false;
 		}
+
+		unsigned long fileSizeHigh = 0;
+		auto sz = GetFileSize(hFile, &fileSizeHigh);
+		if (sz < MEMORY_SIZE)
+			ExtendMapFileSize(hFile, MEMORY_SIZE - sz);
 				
 
 		_hMap = ::CreateFileMapping(hFile,
@@ -89,8 +94,6 @@ bool CMessageQueue::Publish(int message_code, vector<string> args)
 	::WaitForSingleObject(_hMutexForMessageQueue, INFINITE);
 	if (_writePos - _readPos < MEMORY_SIZE)
 	{
-		CMemoryMessage* ptemp = _pBeginPos + 1;
-		int temp_size = sizeof(message);
 		*(_pBeginPos + _writePos % MEMORY_SIZE) = message;
 		_writePos++;
 	}
@@ -154,4 +157,25 @@ void CMessageQueue::Dispatch(void* pObj)
 
 		Sleep(10);
 	}
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*摘要：扩展映射文件，以满足共享内存量增长需求
+*      函数将自动从当前文件末端插入“\0”
+*输入：hFile -- 文件句柄
+*      extendSize -- 文件尺寸增加量
+*返回：true -- 扩容成功； fasle -- 扩容失败，失败原因可调用GetLastError
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+bool CMessageQueue::ExtendMapFileSize(HANDLE hFile, int extendSize)
+{
+	if (hFile == INVALID_HANDLE_VALUE) return false;
+
+	int offset = GetFileSize(hFile, NULL);
+	SetFilePointer(hFile, offset, 0, 0); //定位到文件末尾
+	char* pBuf = new char[extendSize];
+	for (int i = 0; i < extendSize; ++i)
+		pBuf[i] = '\0';
+
+	unsigned long writtenBytes = 0;
+	return WriteFile(hFile, (LPCVOID)pBuf, extendSize, &writtenBytes, NULL);
 }

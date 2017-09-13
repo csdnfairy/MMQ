@@ -1,0 +1,3 @@
+﻿  MMQTest.cpp
+d:\study\mmq\messagequeue.h(51): warning C4091: “__declspec(dllexport)”: 没有声明变量时忽略“CMessageQueue”的左侧
+  MMQTest.vcxproj -> D:\Study\MMQ\Debug\MMQTest.exe

@@ -1,9 +1,9 @@
 ﻿  stdafx.cpp
   MessageQueue.cpp
-d:\资料\jchat\项目代码\jchat\memorymq\messagequeue.h(51): warning C4091: “__declspec(dllexport)”: 没有声明变量时忽略“CMessageQueue”的左侧
+d:\study\mmq\messagequeue.h(51): warning C4091: “__declspec(dllexport)”: 没有声明变量时忽略“CMessageQueue”的左侧
   MemoryMessage.cpp
   Delegete.cpp
   正在生成代码...
   dllmain.cpp
-    正在创建库 D:\资料\JChat\项目代码\JChat\Debug\MemoryMQ.lib 和对象 D:\资料\JChat\项目代码\JChat\Debug\MemoryMQ.exp
-  MemoryMQ.vcxproj -> D:\资料\JChat\项目代码\JChat\Debug\MemoryMQ.dll
+    正在创建库 D:\Study\MMQ\Debug\MemoryMQ.lib 和对象 D:\Study\MMQ\Debug\MemoryMQ.exp
+  MemoryMQ.vcxproj -> D:\Study\MMQ\Debug\MemoryMQ.dll
