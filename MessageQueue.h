@@ -12,6 +12,7 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "stdafx.h"
+#include <thread>
 #include "MemoryMessage.h"
 #include "Delegete.h"
 
@@ -42,15 +43,14 @@ private:
 	HANDLE _hMutexForDelQueue;  //委托队列互斥锁
 	const LPCTSTR _messageQueueMutexName = L"_mq_message_queue_mutex_";
 	const LPCTSTR _delegeteQueueMutexName = L"_mq_delegete_queue_mutex_";
-	long _writePos;
-	long _readPos;
-	CMemoryMessage* _pBeginPos; //队列起始地址
+	int* _writePos;   //写指针
+	int* _readPos;    //读指针
+	CMemoryMessage* _pHead; //队列起始地址
 
-	bool _isDispatchStartted;  //是否已经开始消息分发
+	unique_ptr<thread> _dispatcher;  //消息分发器
+	static void Dispatch(void* pObj); //消息分发线程，实际分发动作由此函数完成
 
 	static bool _isCreated; //是否已创建
-
-	static void Dispatch(void* pObj);
 };
 
 #endif

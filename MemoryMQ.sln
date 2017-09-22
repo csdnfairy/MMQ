@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemoryMQ", "MemoryMQ.vcxproj", "{E3B974C9-0357-4EA9-AB53-5A4C85873040}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MMQTest", "MMQTest\MMQTest.vcxproj", "{C6A2E861-080F-4B75-BAAA-6BE731E8F4C0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MQTest_Subcribler", "MQTest_Subcribler\MQTest_Subcribler.vcxproj", "{B37D6320-8EF2-4C1B-8D65-A420E43055A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{C6A2E861-080F-4B75-BAAA-6BE731E8F4C0}.Release|x64.Build.0 = Release|x64
 		{C6A2E861-080F-4B75-BAAA-6BE731E8F4C0}.Release|x86.ActiveCfg = Release|Win32
 		{C6A2E861-080F-4B75-BAAA-6BE731E8F4C0}.Release|x86.Build.0 = Release|Win32
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Debug|x64.ActiveCfg = Debug|x64
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Debug|x64.Build.0 = Debug|x64
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Debug|x86.ActiveCfg = Debug|Win32
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Debug|x86.Build.0 = Debug|Win32
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Release|x64.ActiveCfg = Release|x64
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Release|x64.Build.0 = Release|x64
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Release|x86.ActiveCfg = Release|Win32
+		{B37D6320-8EF2-4C1B-8D65-A420E43055A1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
