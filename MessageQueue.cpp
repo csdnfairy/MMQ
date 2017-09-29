@@ -11,6 +11,7 @@ CMessageQueue::CMessageQueue():_writePos(0),_readPos(0), _dispatcher(nullptr)
 //析构
 CMessageQueue::~CMessageQueue()
 {
+	Destory();
 }
 
 /*+++++++++++++++++++++++++++++++++++++++
@@ -26,7 +27,7 @@ CMessageQueue::~CMessageQueue()
 bool CMessageQueue::Create()
 {
 	/*首先，尝试打开指定映射文件*/
-	_hMap = ::OpenFileMapping(FILE_MAP_WRITE, false, _memName);
+	_hMap = ::OpenFileMapping(FILE_MAP_ALL_ACCESS, false, _memName);
 
 	/*打开失败说明尚未为文件创建映射，需要先创建映射*/
 	if (_hMap == NULL)
@@ -51,7 +52,7 @@ bool CMessageQueue::Create()
 		if (_hMap == INVALID_HANDLE_VALUE) return false;
 			
 		_readPos = (int*)::MapViewOfFile(_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0); //将文件映射至进程地址空间
-		if (_pHead == nullptr) return false;
+		if (_readPos == nullptr) return false;
 		ZeroMemory(_readPos, sizeof(int));
 		_writePos = _readPos + 1;
 		ZeroMemory(_writePos, sizeof(int));
@@ -129,9 +130,17 @@ bool CMessageQueue::UnSubscrible(CALLBACK_FUN callback)
 	return false;
 }
 
+/*销毁消息队列*/
 void CMessageQueue::Destory()
 {
+	if (_hMap != INVALID_HANDLE_VALUE)
+	{
+		UnmapViewOfFile(_hMap);
+		_hMap = INVALID_HANDLE_VALUE;
 
+		CloseHandle(_hMutexForMessageQueue);
+		CloseHandle(_hMutexForDelQueue);
+	}
 }
 
 void CMessageQueue::Dispatch(void* pObj)
@@ -140,7 +149,7 @@ void CMessageQueue::Dispatch(void* pObj)
     
 	while (true)
 	{
-		if (pQue->_readPos < pQue->_writePos)
+		if (*(pQue->_readPos) < *(pQue->_writePos))
 		{
 			CMemoryMessage message = *(pQue->_pHead + *(pQue->_readPos) % MEMORY_SIZE);
 			int code = message.Code();
