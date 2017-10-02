@@ -4,14 +4,21 @@
 #include <thread>
 
 //构造器
-CMessageQueue::CMessageQueue():_writePos(0),_readPos(0), _dispatcher(nullptr)
+CMessageQueue::CMessageQueue():_dispatcher(nullptr)
 {
 }
 
 //析构
 CMessageQueue::~CMessageQueue()
 {
-	Destory();
+	int cnt = (*_refers) - 1;
+	memcpy_s(_refers, sizeof(int), &cnt, sizeof(int));
+
+	/*没有任何调用者引用该队列时，自动销毁队列*/
+	if (cnt == 0)
+	{
+		Destory();
+	}	
 }
 
 /*+++++++++++++++++++++++++++++++++++++++
@@ -52,13 +59,18 @@ bool CMessageQueue::Create()
 		if (_hMap == INVALID_HANDLE_VALUE) return false;
 			
 		_readPos = (int*)::MapViewOfFile(_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0); //将文件映射至进程地址空间
-		if (_readPos == nullptr) return false;
-		ZeroMemory(_readPos, sizeof(int));
-		_writePos = _readPos + 1;
-		ZeroMemory(_writePos, sizeof(int));
+		if (_readPos == nullptr) return false;		
+		_writePos = _readPos + 1;		
+		_refers = _writePos + 1;
+		if (*_refers == 0)
+		{
+			ZeroMemory(_readPos, sizeof(int));
+			ZeroMemory(_writePos, sizeof(int));
+			ZeroMemory(_refers, sizeof(int));
+		}
 
-		/*在起始添加一个计数器，用于记录当前队列中有多少消息*/
-		_pHead = (CMemoryMessage*)(_writePos + 1);
+		/*真正的消息队列头部地址*/
+		_pHead = (CMemoryMessage*)(_refers + 1);
 			
 		/*创建或打开消息队列锁和委托队列锁*/
 		_hMutexForMessageQueue = ::CreateMutex(nullptr, false, _messageQueueMutexName);
@@ -66,6 +78,10 @@ bool CMessageQueue::Create()
 
 		::CloseHandle(hFile);
 	}
+
+	int cnt = (*_refers) + 1;  //引用计数增加，表示有新调用者引用了本消息队列
+	memcpy_s(_refers, sizeof(int), &cnt, sizeof(int));
+
 	return true;
 }
 
@@ -110,7 +126,7 @@ bool CMessageQueue::Subscrible(int min_message_code, int max_message_code, CALLB
 	//::ReleaseMutex(_hMutexForDelQueue);
 
 	if (_dispatcher == nullptr)
-		_dispatcher.reset(new thread(Dispatch, this));
+		_dispatcher = unique_ptr<std::thread>(new thread(Dispatch, this));
 		
 	return true;
 }
@@ -143,6 +159,11 @@ void CMessageQueue::Destory()
 	}
 }
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++
+*摘要：消息自定分发函数
+*输入：消息队列对象指针
+*输出：无
++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void CMessageQueue::Dispatch(void* pObj)
 {
 	CMessageQueue* pQue = (CMessageQueue*)pObj;

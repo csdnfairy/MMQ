@@ -9,6 +9,7 @@
 版权（C） GPL
 修改记录：
        新建， 2017年7月7日 朱岳江
+	   加入引用计数机制，实现自定销毁功能， 2017年10月2日
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "stdafx.h"
@@ -30,7 +31,9 @@ public:
 	MEMORY_MQ_API bool Publish(int message_code, vector<string> args); //发布消息
 	MEMORY_MQ_API bool Subscrible(int min_message_code, int max_message_code, CALLBACK_FUN callback); //订阅特定范围内的所有消息
 	MEMORY_MQ_API bool UnSubscrible(CALLBACK_FUN callback);//取消消息订阅
-	MEMORY_MQ_API void Destory(); //销毁消息队列
+
+private:
+	void Destory(); //销毁消息队列
 
 private:
 	bool ExtendMapFileSize(HANDLE hFile, int extendSize);
@@ -45,6 +48,7 @@ private:
 	const LPCTSTR _delegeteQueueMutexName = L"_mq_delegete_queue_mutex_";
 	int* _writePos;   //写指针
 	int* _readPos;    //读指针
+	int* _refers;     //引用计数指针，用于记录有多少调用者引用了该消息队列
 	CMemoryMessage* _pHead; //队列起始地址
 
 	unique_ptr<thread> _dispatcher;  //消息分发器
