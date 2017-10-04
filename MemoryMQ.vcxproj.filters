@@ -33,6 +33,9 @@
     <ClInclude Include="Delegete.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CancelToken.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Delegete.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CancelToken.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

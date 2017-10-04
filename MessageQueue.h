@@ -16,6 +16,7 @@
 #include <thread>
 #include "MemoryMessage.h"
 #include "Delegete.h"
+#include "CancelToken.h"
 
 #define MEMORY_MQ_API _declspec(dllexport) 
 #define MEMORY_SIZE 10240 //内存长度
@@ -24,6 +25,7 @@ MEMORY_MQ_API class CMessageQueue
 {
 public:
 	MEMORY_MQ_API CMessageQueue();
+	CMessageQueue(const CMessageQueue& que) = delete;
 	MEMORY_MQ_API ~CMessageQueue();
 
 public:
@@ -36,6 +38,7 @@ private:
 	void Destory(); //销毁消息队列
 
 private:
+	void WaitForDispatchCancelled(int waitTimeLimit = 1000);
 	bool ExtendMapFileSize(HANDLE hFile, int extendSize);
 
 private:
@@ -51,8 +54,9 @@ private:
 	int* _refers;     //引用计数指针，用于记录有多少调用者引用了该消息队列
 	CMemoryMessage* _pHead; //队列起始地址
 
-	unique_ptr<thread> _dispatcher;  //消息分发器
 	static void Dispatch(void* pObj); //消息分发线程，实际分发动作由此函数完成
+	CCancelToken _ct; //用于取消分发任务
+	bool _isDispatching;  //是否已启动分发器
 
 	static bool _isCreated; //是否已创建
 };

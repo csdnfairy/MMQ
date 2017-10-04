@@ -2,15 +2,18 @@
 #include "MessageQueue.h"
 #include <algorithm>
 #include <thread>
+#include <chrono>
 
 //构造器
-CMessageQueue::CMessageQueue():_dispatcher(nullptr)
+CMessageQueue::CMessageQueue():_isDispatching(false)
 {
 }
 
 //析构
 CMessageQueue::~CMessageQueue()
 {
+	WaitForDispatchCancelled(); //等待消息分发任务被取消
+
 	int cnt = (*_refers) - 1;
 	memcpy_s(_refers, sizeof(int), &cnt, sizeof(int));
 
@@ -19,6 +22,21 @@ CMessageQueue::~CMessageQueue()
 	{
 		Destory();
 	}	
+}
+
+void CMessageQueue::WaitForDispatchCancelled(int waitTimeLimit)
+{
+	if (_isDispatching)
+	{
+		_ct.Cancel();
+		int counter = 0;
+		int waitInterval = 100;
+		while (_isDispatching)
+		{
+			std::this_thread::sleep_for(chrono::milliseconds(waitInterval));
+			if (++counter * waitInterval >= waitTimeLimit) break;
+		}
+	}
 }
 
 /*+++++++++++++++++++++++++++++++++++++++
@@ -125,9 +143,13 @@ bool CMessageQueue::Subscrible(int min_message_code, int max_message_code, CALLB
 	_dels.push_back(del);
 	//::ReleaseMutex(_hMutexForDelQueue);
 
-	if (_dispatcher == nullptr)
-		_dispatcher = unique_ptr<std::thread>(new thread(Dispatch, this));
-		
+	if (!_isDispatching)
+	{
+		thread t(Dispatch, this);
+		t.detach();
+		_isDispatching = true;
+	}
+				
 	return true;
 }
 
@@ -168,7 +190,7 @@ void CMessageQueue::Dispatch(void* pObj)
 {
 	CMessageQueue* pQue = (CMessageQueue*)pObj;
     
-	while (true)
+	while (!(pQue->_ct.IsCancelRequest()))
 	{
 		if (*(pQue->_readPos) < *(pQue->_writePos))
 		{
@@ -192,6 +214,8 @@ void CMessageQueue::Dispatch(void* pObj)
 
 		Sleep(10);
 	}
+
+	pQue->_isDispatching = false;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
