@@ -9,12 +9,13 @@ public:
 
 private:
 	int _code;
-	vector<std::string> _args;
+	//vector<LPCTSTR> _args;
+	char* _args;
 
 public:
-	void AddArg(std::string arg);
+	void AddArg(char* arg);
 	int Code() { return _code; }
-	vector<string> Args() { return _args; }
+	char* Args() { return _args; }
 };
 
 #endif

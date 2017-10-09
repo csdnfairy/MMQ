@@ -111,21 +111,21 @@ bool CMessageQueue::Create()
 *输出：true -- 发布成功
 *      false -- 失败， 原因请调用GetLastError
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-bool CMessageQueue::Publish(int message_code, vector<string> args)
+bool CMessageQueue::Publish(int message_code, char* args, int len)
 {
 	CMemoryMessage message(message_code);
-	vector<string>::iterator begin = args.begin();
-	for (; begin < args.end(); ++begin)
-		message.AddArg(*begin);
-	
-	//::WaitForSingleObject(_hMutexForMessageQueue, INFINITE);
+	message.AddArg(args);
+
+	char* pDataBuf = new char[len + 1];
+	_itoa_s(message_code, pDataBuf,len + 1, 10);
+	memcpy_s(pDataBuf + 1, len, args, len);
+
 	if (_writePos - _readPos < MEMORY_SIZE)
 	{
-		memcpy_s(_pHead + *_writePos % MEMORY_SIZE, sizeof(CMemoryMessage), &message, sizeof(message));
+		memcpy_s(_pHead + *_writePos % MEMORY_SIZE, len + 1, pDataBuf, len + 1);
 		int newWPos = *_writePos + 1;
 		memcpy_s(_writePos, sizeof(int), &newWPos, sizeof(int));
 	}
-	//::ReleaseMutex(_hMutexForMessageQueue);
 
 	return true;
 }
@@ -194,21 +194,20 @@ void CMessageQueue::Dispatch(void* pObj)
 	{
 		if (*(pQue->_readPos) < *(pQue->_writePos))
 		{
-			CMemoryMessage message = *(pQue->_pHead + *(pQue->_readPos) % MEMORY_SIZE);
+			auto message = pQue->ReadMessage();
 			int code = message.Code();
 			auto match = find_if(pQue->_dels.begin(), pQue->_dels.end(),
 				[code](CDelegete d) {return code <= d.MaxCode() && code >= d.MinCode(); });
 			if (match >= pQue->_dels.begin() && match < pQue->_dels.end())
 			{
 				auto fun = match->GetDelFun();
-				fun(message.Code(), message.Args());
+				string arg(message.Args());
+				vector<string> args;
+				args.push_back(arg);
+				fun(message.Code(), args);
 
-				::WaitForSingleObject(pQue->_hMutexForMessageQueue, INFINITE);
 				int newRPos = *(pQue->_readPos++);
 				memcpy_s(pQue->_readPos, sizeof(int), &newRPos, sizeof(int));
-				::ReleaseMutex(pQue->_hMutexForMessageQueue);
-
-				pQue->UnSubscrible(match->GetDelFun()); //删除委托队列中的委托
 			}
 		}
 
@@ -216,6 +215,19 @@ void CMessageQueue::Dispatch(void* pObj)
 	}
 
 	pQue->_isDispatching = false;
+}
+
+CMemoryMessage CMessageQueue::ReadMessage()
+{
+	char* pArg = (char*)(_pHead + *_readPos % MEMORY_SIZE);
+	char* pCode = new char[1];
+	memcpy_s(pCode, 1, pArg, 1);
+	int code = atoi(pCode);
+
+	CMemoryMessage message(code);
+	message.AddArg(pArg + 1);
+
+	return message;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

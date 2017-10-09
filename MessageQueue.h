@@ -30,7 +30,7 @@ public:
 
 public:
 	MEMORY_MQ_API bool Create();   //创建消息队列
-	MEMORY_MQ_API bool Publish(int message_code, vector<string> args); //发布消息
+	MEMORY_MQ_API bool Publish(int message_code, char* args, int len); //发布消息
 	MEMORY_MQ_API bool Subscrible(int min_message_code, int max_message_code, CALLBACK_FUN callback); //订阅特定范围内的所有消息
 	MEMORY_MQ_API bool UnSubscrible(CALLBACK_FUN callback);//取消消息订阅
 
@@ -40,6 +40,7 @@ private:
 private:
 	void WaitForDispatchCancelled(int waitTimeLimit = 1000);
 	bool ExtendMapFileSize(HANDLE hFile, int extendSize);
+	CMemoryMessage ReadMessage();
 
 private:
 	std::vector<CDelegete> _dels; //委托队列

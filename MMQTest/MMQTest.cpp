@@ -26,18 +26,26 @@ int main()
 	}
 
 	/*发布消息*/
-	vector<string> ars;
-	ars.push_back("test");
-	if (!que.Publish(0, ars))
+	//vector<LPCTSTR> ars;
+	//ars.push_back(L"test");
+	int i = 0;
+	int max = 10000;
+	while (i < max)
 	{
-		err = GetLastError();
-		std::cout << "发布失败：" << err << endl;
-	}
-	else
-	{
-		std::cout << "发布消息:" << endl;
-		std::cout << "消息码：" << 0 << endl;
-		std::cout << "消息内容：test" << endl;
+		if (!que.Publish(i % 10, "test", 5))
+		{
+			err = GetLastError();
+			std::cout <<"消息"<<i<< "发布失败：" << err << endl;
+		}
+		else
+		{
+			std::cout << "发布消息:" << endl;
+			std::cout << "消息码：" << i << endl;
+			std::cout << "消息内容：test" << endl;
+		}
+
+		++i;
+		Sleep(1000);
 	}
 
 	std::cout << "单击任意键退出..." << endl;
