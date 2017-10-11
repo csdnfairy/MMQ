@@ -13,7 +13,7 @@ using namespace std;
 #pragma comment(lib, "MemoryMQ")
 
 //static int counter = 10;
-#define WAIT_TIME 100
+#define WAIT_TIME 10
 static atomic_int counter(WAIT_TIME);
 
 void OnMessageRecieved(int code, vector<string> args);

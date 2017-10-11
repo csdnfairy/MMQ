@@ -120,7 +120,7 @@ bool CMessageQueue::Publish(int message_code, char* args, int len)
 	_itoa_s(message_code, pDataBuf,len + 1, 10);
 	memcpy_s(pDataBuf + 1, len, args, len);
 
-	if (_writePos - _readPos < MEMORY_SIZE)
+	if (*_writePos - *_readPos < MEMORY_SIZE / sizeof(CMemoryMessage))
 	{
 		memcpy_s(_pHead + *_writePos % MEMORY_SIZE, len + 1, pDataBuf, len + 1);
 		int newWPos = *_writePos + 1;
@@ -206,7 +206,7 @@ void CMessageQueue::Dispatch(void* pObj)
 				args.push_back(arg);
 				fun(message.Code(), args);
 
-				int newRPos = *(pQue->_readPos++);
+				int newRPos = *pQue->_readPos + 1;
 				memcpy_s(pQue->_readPos, sizeof(int), &newRPos, sizeof(int));
 			}
 		}
@@ -215,6 +215,11 @@ void CMessageQueue::Dispatch(void* pObj)
 	}
 
 	pQue->_isDispatching = false;
+}
+
+void CMessageQueue::UpdatePos()
+{
+
 }
 
 CMemoryMessage CMessageQueue::ReadMessage()

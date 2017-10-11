@@ -35,6 +35,7 @@ public:
 	MEMORY_MQ_API bool UnSubscrible(CALLBACK_FUN callback);//取消消息订阅
 
 private:
+	void UpdatePos();
 	void Destory(); //销毁消息队列
 
 private:
