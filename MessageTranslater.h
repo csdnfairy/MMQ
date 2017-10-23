@@ -22,11 +22,8 @@ public:
 	static CMemoryMessage FromString(const std::string* message);
 	static string ToString(const CMemoryMessage* message);
 
-	static CMemoryMessage FromChars(const char* message);
-	static int ToChars(const CMemoryMessage* message, char* pbuf);
-
-	static CMemoryMessage FromCodeAndArgs(int code, const vector<string>* args);
-	static int ToCodeAndArgs(const CMemoryMessage* message, vector<string>* argsBuf);
+	static CMemoryMessage FromCodeAndArgs(int code, const vector<string>& args);
+	static int ToCodeAndArgs(const CMemoryMessage& message, vector<string>& argsBuf);
 
 private:
 	static bool IsValid(const string* message);

@@ -12,12 +12,10 @@ CMemoryMessage::~CMemoryMessage()
 {
 }
 
-void CMemoryMessage::AddArg(char* arg)
+void CMemoryMessage::AddArg(string arg)
 {
-	//if (arg != NULL)
-	//{
-	//	_args.push_back(arg);
-	//}
-
-	_args = arg;
+	if (!arg.empty())
+	{
+		_args.push_back(arg);
+	}
 }

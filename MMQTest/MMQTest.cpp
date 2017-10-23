@@ -26,13 +26,14 @@ int main()
 	}
 
 	/*发布消息*/
-	//vector<LPCTSTR> ars;
-	//ars.push_back(L"test");
+	vector<string> ars;
+	ars.push_back("test_arg1");
+	ars.push_back("test_arg2");
 	int i = 0;
 	int max = 10000;
 	while (i < max)
 	{
-		if (!que.Publish(i % 10, "test", 5))
+		if (!que.Publish(i, ars))
 		{
 			err = GetLastError();
 			std::cout <<"消息"<<i<< "发布失败：" << err << endl;
@@ -41,7 +42,11 @@ int main()
 		{
 			std::cout << "发布消息:" << endl;
 			std::cout << "消息码：" << i << endl;
-			std::cout << "消息内容：test" << endl;
+			vector<string>::iterator iter = begin(ars);
+			while (iter < end(ars))
+			{
+				std::cout << "消息参数:" << iter++->c_str() << endl;
+			}
 		}
 
 		++i;

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MessageQueue.h"
+#include "MessageTranslater.h"
 #include <algorithm>
 #include <thread>
 #include <chrono>
@@ -88,7 +89,7 @@ bool CMessageQueue::Create()
 		}
 
 		/*真正的消息队列头部地址*/
-		_pHead = (CMemoryMessage*)(_refers + 1);
+		_pHead = (char*)(_refers + 1);
 			
 		/*创建或打开消息队列锁和委托队列锁*/
 		_hMutexForMessageQueue = ::CreateMutex(nullptr, false, _messageQueueMutexName);
@@ -111,19 +112,21 @@ bool CMessageQueue::Create()
 *输出：true -- 发布成功
 *      false -- 失败， 原因请调用GetLastError
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-bool CMessageQueue::Publish(int message_code, char* args, int len)
+bool CMessageQueue::Publish(int message_code, vector<string> args)
 {
-	CMemoryMessage message(message_code);
-	message.AddArg(args);
+	//CMemoryMessage message(message_code);
+	//message.AddArg(args);
+	CMemoryMessage message = CMessageTranslater::FromCodeAndArgs(message_code, args);
 
-	char* pDataBuf = new char[len + 1];
-	_itoa_s(message_code, pDataBuf,len + 1, 10);
-	memcpy_s(pDataBuf + 1, len, args, len);
+    string strMessage = CMessageTranslater::ToString(&message);
+	//_itoa_s(message_code, pDataBuf,len + 1, 10);
+	//memcpy_s(pDataBuf + 1, len, args, len);
 
 	if (*_writePos - *_readPos < MEMORY_SIZE / sizeof(CMemoryMessage))
 	{
-		memcpy_s(_pHead + *_writePos % MEMORY_SIZE, len + 1, pDataBuf, len + 1);
-		int newWPos = *_writePos + 1;
+		int len = strMessage.length();
+		memcpy_s(_pHead + *_writePos % MEMORY_SIZE, len, strMessage.c_str(), len);
+		int newWPos = *_writePos + len;
 		memcpy_s(_writePos, sizeof(int), &newWPos, sizeof(int));
 	}
 
@@ -201,13 +204,7 @@ void CMessageQueue::Dispatch(void* pObj)
 			if (match >= pQue->_dels.begin() && match < pQue->_dels.end())
 			{
 				auto fun = match->GetDelFun();
-				string arg(message.Args());
-				vector<string> args;
-				args.push_back(arg);
-				fun(message.Code(), args);
-
-				int newRPos = *pQue->_readPos + 1;
-				memcpy_s(pQue->_readPos, sizeof(int), &newRPos, sizeof(int));
+				fun(message.Code(), message.Args());
 			}
 		}
 
@@ -224,13 +221,33 @@ void CMessageQueue::UpdatePos()
 
 CMemoryMessage CMessageQueue::ReadMessage()
 {
-	char* pArg = (char*)(_pHead + *_readPos % MEMORY_SIZE);
-	char* pCode = new char[1];
-	memcpy_s(pCode, 1, pArg, 1);
-	int code = atoi(pCode);
+	//char* pArg = (char*)(_pHead + *_readPos % MEMORY_SIZE);
+	//char* pCode = new char[1];
+	//memcpy_s(pCode, 1, pArg, 1);
+	//int code = atoi(pCode);
 
-	CMemoryMessage message(code);
-	message.AddArg(pArg + 1);
+	//CMemoryMessage message(code);
+	//message.AddArg(pArg + 1);
+	//string strMessage = *(_pHead + *_readPos % MEMORY_SIZE);
+	string strMessage;
+	int begin = *_readPos % MEMORY_SIZE;
+	int end = begin;
+	while ((_pHead + end) != nullptr)
+	{
+		//char temp = *(_pHead + end);
+		strMessage.append(_pHead + end, 1);
+
+		if (*(_pHead + end++) == 0x03)
+			break;
+	}
+	
+	CMemoryMessage message = CMessageTranslater::FromString(&strMessage);
+
+	if (end > begin)
+	{
+		int newRPos = *_readPos + strMessage.length();
+		memcpy_s(_readPos, sizeof(int), &newRPos, sizeof(int));
+	}
 
 	return message;
 }

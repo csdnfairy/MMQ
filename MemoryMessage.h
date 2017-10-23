@@ -14,8 +14,8 @@ private:
 
 public:
 	void AddArg(string arg);
-	int Code() { return _code; }
-	vector<string> Args() { return _args; }
+	int Code() const { return _code; }
+	vector<string> Args() const { return _args; }
 };
 
 #endif

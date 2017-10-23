@@ -6,6 +6,7 @@ d:\资料\mmq\debug\canceltoken.obj
 d:\资料\mmq\debug\delegete.obj
 d:\资料\mmq\debug\memorymessage.obj
 d:\资料\mmq\debug\messagequeue.obj
+d:\资料\mmq\debug\messagetranslater.obj
 d:\资料\mmq\debug\dllmain.obj
 d:\资料\mmq\debug\memorymq.ilk
 d:\资料\mmq\debug\memorymq.dll
@@ -13,9 +14,7 @@ d:\资料\mmq\debug\memorymq.pdb
 d:\资料\mmq\debug\memorymq.lib
 d:\资料\mmq\debug\memorymq.exp
 d:\资料\mmq\debug\mmqtest.ilk
-d:\资料\mmq\debug\mqtest_subcribler.ilk
 d:\资料\mmq\debug\mmqtest.pdb
-d:\资料\mmq\debug\mqtest_subcribler.pdb
 d:\资料\mmq\debug\memorymq.tlog\cl.command.1.tlog
 d:\资料\mmq\debug\memorymq.tlog\cl.read.1.tlog
 d:\资料\mmq\debug\memorymq.tlog\cl.write.1.tlog

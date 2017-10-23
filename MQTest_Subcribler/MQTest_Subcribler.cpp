@@ -13,7 +13,7 @@ using namespace std;
 #pragma comment(lib, "MemoryMQ")
 
 //static int counter = 10;
-#define WAIT_TIME 10
+#define WAIT_TIME 30
 static atomic_int counter(WAIT_TIME);
 
 void OnMessageRecieved(int code, vector<string> args);
@@ -56,19 +56,18 @@ int main()
 //该函数用于接收消息，消息队列将向其传递消息码和消息字符串
 void OnMessageRecieved(int messageCode, vector<string> args)
 {
-	std::cout << "接收消息，消息码：" << messageCode << endl;
+	std::cout << "消息码：" << messageCode << endl;
 	if (args.size() == 0)
 	{
 		cout << "无消息内容" << endl;
 	}
 	else
 	{
-		cout << "消息内容：";
 		vector<string>::iterator iter = args.begin();
+		int i = 0;
 		while (iter < args.end())
 		{
-			cout << iter->c_str() << endl;
-			iter++;
+			cout <<"消息参数"<<i++<<":"<< iter++->c_str() << endl;
 		}
 	}
 
